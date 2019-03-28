@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "391939916152",
+    "firebase_url": "https://texting-28d29.firebaseio.com",
+    "project_id": "texting-28d29",
+    "storage_bucket": "texting-28d29.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:391939916152:android:51023d3866ba4d6a",
+        "android_client_info": {
+          "package_name": "celesteortiz.com.texting"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "391939916152-b5jo8it8alnno0853gcohru33li6p709.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "celesteortiz.com.texting",
+            "certificate_hash": "1849ac6eaf3a78563ea06eba16ae3e2432143fa7"
+          }
+        },
+        {
+          "client_id": "391939916152-gkd0dmcqot5l0cjqdenoqtufipm9a285.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAciOI4jW2G8VxJKFUT5qvajrsuSYuVBsU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "391939916152-gkd0dmcqot5l0cjqdenoqtufipm9a285.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
