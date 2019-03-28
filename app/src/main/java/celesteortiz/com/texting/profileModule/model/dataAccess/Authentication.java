@@ -18,6 +18,7 @@ import celesteortiz.com.texting.profileModule.events.ProfileEvent;
 /*
 * Authentication class
 * Autenticacion que unicamente actualiza el perfil de Firebase
+* Probando GitHub 28/03/2019
 * */
 public class Authentication {
     private FirebaseAuthenticationAPI mAuthenticationAPI;
