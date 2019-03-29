@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.net.Uri;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import celesteortiz.com.texting.common.pojo.UserPojo;
 import celesteortiz.com.texting.profileModule.events.ProfileEvent;
 import celesteortiz.com.texting.profileModule.model.ProfileInteractor;
 import celesteortiz.com.texting.profileModule.model.ProfileInteractorImpl;
+import celesteortiz.com.texting.profileModule.view.ProfileActivity;
 import celesteortiz.com.texting.profileModule.view.ProfileView;
 
 public class ProfilePresenterImpl implements ProfilePresenter {
@@ -79,6 +81,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         }
     }
 
+    //La actividad notifica si se selecciono o no una fotografia
     @Override
     public void result(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK){
@@ -90,10 +93,47 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         }
 
     }
-
+    @Subscribe
     @Override
     public void onEventListener(ProfileEvent event) {
+        if(mView != null){
+            mView.hideProgress();
 
+            switch (event.getTypeEvent()){
+                case ProfileEvent.ERROR_USER_NAME:
+                    mView.enableUIElements();
+                    mView.onError(event.getResMsg());
+                    break;
+                case ProfileEvent.ERROR_PROFILE:
+
+                    break;
+                case ProfileEvent.ERROR_SERVER:
+
+                    break;
+                case ProfileEvent.ERROR_IMAGE:
+                    mView.enableUIElements();
+                    mView.onError(event.getResMsg());
+                    break;
+                case ProfileEvent.SAVE_USERNAME:
+                    mView.saveUserNameSuccess();
+                    saveSuccess();
+                    break;
+                case ProfileEvent.UPLOAD_IMAGE:
+                    //Se pasa la nueva url de la foto foto para que se actualice en ProfileActivity como en MainActivity
+                    mView.updateImageSuccess(event.getPhotoUrl());
+                    mUser.setPhotoUrl(event.getPhotoUrl());
+                    saveSuccess();
+                    break;
+            }
+        }
+    }
+
+    private void saveSuccess() {
+        mView.menuNormalMode();
+        //Notificar a Profile Activity y a MainActivity que se ha realizado la actualizacion
+        mView.setResultOk(mUser.getUsername(), mUser.getPhotoUrl());
+        //Una vez que se haya actualizado el usuario volvemos a modo normal
+        isEdit = false;
     }
 
     private boolean setProgress() {

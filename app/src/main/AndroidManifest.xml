@@ -10,7 +10,7 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true">
         <activity
-            android:name=".profileModule.ProfileActivity"
+            android:name=".profileModule.view.ProfileActivity"
             android:label="@string/profile_title"
             android:windowSoftInputMode="stateHidden" />
         <activity

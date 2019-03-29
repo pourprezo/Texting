@@ -1,9 +1,10 @@
 package celesteortiz.com.texting.common.utils;
 
 import android.content.Context;
-import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.FragmentActivity;
+import android.os.Build;
+import android.support.design.widget.Snackbar;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -11,11 +12,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.util.regex.Pattern;
-
 import celesteortiz.com.texting.R;
-import celesteortiz.com.texting.mainModule.view.MainActivity;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class UtilsCommon {
     /*
@@ -60,4 +57,18 @@ public class UtilsCommon {
         return isValid;
 
     }
+    /* Verificacion de versiones */
+    public static boolean hasMaterialDesign() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    /* Mostrar mensajes con Snackbar */
+    public static void showSnackbar(View contentMain, int resMsg) {
+        showSnackbar(contentMain, resMsg, Snackbar.LENGTH_SHORT);
+    }
+
+    public static void showSnackbar(View contentMain, int resMsg, int duration) {
+        showSnackbar(contentMain, resMsg, duration);
+    }
+
 }
