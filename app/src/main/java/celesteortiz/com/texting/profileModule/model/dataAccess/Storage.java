@@ -63,10 +63,15 @@ public class Storage {
             //Referencia para la foto actual de perfil
             StorageReference storageReference = mStorageAPI.getmFirebaseStorage().getReferenceFromUrl(downloadUrl);
             //Referencia para la foto antigua de perfil
-            StorageReference oldStorageReference = mStorageAPI.getmFirebaseStorage().getReferenceFromUrl(oldPhotoUrl);
+            StorageReference oldStorageReference = null;
+            try {
+                oldStorageReference = mStorageAPI.getmFirebaseStorage().getReferenceFromUrl(oldPhotoUrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             //Comparar que la nueva y antigua no sean iguales y ahora eliminar
-            if (!oldStorageReference.getPath().equals(storageReference.getPath())){
+            if (oldStorageReference != null && !oldStorageReference.getPath().equals(storageReference.getPath())){
                 oldStorageReference.delete().addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {

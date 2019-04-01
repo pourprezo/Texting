@@ -68,7 +68,7 @@ public class UtilsCommon {
     }
 
     public static void showSnackbar(View contentMain, int resMsg, int duration) {
-        showSnackbar(contentMain, resMsg, duration);
+        Snackbar.make(contentMain, resMsg, duration).show();
     }
 
 }

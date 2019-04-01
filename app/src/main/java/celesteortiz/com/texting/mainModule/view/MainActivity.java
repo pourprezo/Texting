@@ -1,11 +1,13 @@
 package celesteortiz.com.texting.mainModule.view;
 
+import android.app.ActivityOptions;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -36,6 +38,7 @@ import celesteortiz.com.texting.mainModule.MainPresenterImpl;
 import celesteortiz.com.texting.mainModule.view.adapters.OnItemClickListener;
 import celesteortiz.com.texting.mainModule.view.adapters.RequestAdapter;
 import celesteortiz.com.texting.mainModule.view.adapters.UserAdapter;
+import celesteortiz.com.texting.profileModule.view.ProfileActivity;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /*
@@ -46,6 +49,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * */
 public class MainActivity extends AppCompatActivity implements OnItemClickListener, MainView {
 
+    private static final int RC_PROFILE = 23;
     @BindView(R.id.imgProfile)
     CircleImageView imgProfile;
     @BindView(R.id.toolbar)
@@ -121,6 +125,20 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 startActivity(intent);
                 break;
             case R.id.action_profile:
+                Intent intentProfile = new Intent(this, ProfileActivity.class);
+                intentProfile.putExtra(UserPojo.USERNAME, mUser.getUsername());
+                intentProfile.putExtra(UserPojo.EMAIL, mUser.getEmail());
+                intentProfile.putExtra(UserPojo.PHOTO_URL, mUser.getPhotoUrl());
+
+                if(UtilsCommon.hasMaterialDesign()){
+                    startActivityForResult(intentProfile, RC_PROFILE,
+                            ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+
+                }else{
+                    //En caso de que la version sea menor a Lolipop...
+                    startActivityForResult(intentProfile, RC_PROFILE);
+
+                }
                 break;
             case R.id.action_about:
                 openAbout();
@@ -130,6 +148,25 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Actualizar nombre e imagen una vez que se haya actualizado con exito desde Perfil
+     * */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            switch (requestCode){
+                case RC_PROFILE:
+                    mUser.setUsername(data.getStringExtra(UserPojo.USERNAME));
+                    mUser.setPhotoUrl(data.getStringExtra(UserPojo.PHOTO_URL));
+                    configToolbar();
+                    break;
+            }
+        }
+
+
     }
 
     private void openAbout() {

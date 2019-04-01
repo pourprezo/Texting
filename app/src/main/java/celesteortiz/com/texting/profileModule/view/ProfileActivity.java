@@ -1,16 +1,18 @@
 package celesteortiz.com.texting.profileModule.view;
 
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.telecom.PhoneAccount;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -30,9 +33,11 @@ import com.bumptech.glide.request.target.Target;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import celesteortiz.com.texting.R;
 import celesteortiz.com.texting.common.pojo.UserPojo;
 import celesteortiz.com.texting.common.utils.UtilsCommon;
+import celesteortiz.com.texting.common.utils.UtilsImage;
 import celesteortiz.com.texting.profileModule.ProfilePresenter;
 import celesteortiz.com.texting.profileModule.ProfilePresenterImpl;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -69,8 +74,8 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
         mPresenter = new ProfilePresenterImpl(this);
         mPresenter.onCreate();
         mPresenter.setupUser(getIntent().getStringExtra(UserPojo.USERNAME),
-                            getIntent().getStringExtra(UserPojo.EMAIL),
-                            getIntent().getStringExtra(UserPojo.PHOTO_URL));
+                getIntent().getStringExtra(UserPojo.EMAIL),
+                getIntent().getStringExtra(UserPojo.PHOTO_URL));
 
         configActionBar();
 
@@ -91,18 +96,18 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_save_profile:
                 mCurrentMenuItem = item;
-                if(etUsername.getText() != null){
+                if (etUsername.getText() != null) {
                     mPresenter.updateUsername(etUsername.getText().toString().trim());
 
                 }
                 break;
             case android.R.id.home:
-                if(UtilsCommon.hasMaterialDesign()){
+                if (UtilsCommon.hasMaterialDesign()) {
                     finishAfterTransition();
-                }else {
+                } else {
                     finish();
                 }
                 break;
@@ -113,19 +118,19 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mPresenter.result(requestCode, resultCode, data);
+        mPresenter.result(requestCode, resultCode, data); //Va a a liena 86
     }
 
 
     private void configActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null){
+        if (actionBar != null) {
             //Permitir que se muestre la tecla de retroceso en la barra de estado
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 
-    private void setImageProfile(String photoUrl){
+    private void setImageProfile(String photoUrl) {
         //Cargar imagen con Glide
         RequestOptions options = new RequestOptions()
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -141,16 +146,17 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
                 .listener(new RequestListener<Bitmap>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                       // hideProgressImage();
+                        hideProgressImage();
                         imgProfile.setImageDrawable(ContextCompat.
                                 getDrawable(ProfileActivity.this, R.drawable.ic_upload));
                         return true;
                     }
+
                     //TODO Enable Hide progress image
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                         imgProfile.setImageBitmap(resource);
-                        // hideProgressImage();
+                        hideProgressImage();
                         return true;
                     }
                 })
@@ -158,9 +164,15 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
 
     }
 
+
+    @OnClick({R.id.imgProfile, R.id.btnEditPhoto})
+    public void onSelectPhoto(View view) {
+        mPresenter.checkEditionMode();
+    }
+
     /**
      * Profile View
-     * */
+     */
 
     @Override
     public void enableUIElements() {
@@ -174,8 +186,8 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
 
     private void setInputs(boolean enable) {
         etUsername.setEnabled(enable);
-        btnEditPhoto.setVisibility(enable? View.VISIBLE : View.GONE);
-        if(mCurrentMenuItem != null){
+        btnEditPhoto.setVisibility(enable ? View.VISIBLE : View.GONE);
+        if (mCurrentMenuItem != null) {
             mCurrentMenuItem.setEnabled(enable);
         }
     }
@@ -222,11 +234,42 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
     @Override
     public void openDialogPreview(Intent data) {
         final String urlLocal = data.getDataString();
+
         final ViewGroup nullParent = null;
         View view = getLayoutInflater().inflate(R.layout.dialog_upload_image_preview, nullParent);
+
         final ImageView imageDialog = view.findViewById(R.id.imgDialog);
+        final TextView tvMessage = view.findViewById(R.id.tvMessage);
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogFragmentTheme)
+                .setTitle(R.string.profile_dialog_title)
+                .setPositiveButton(R.string.profile_dialog_accept, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mPresenter.updateImage(ProfileActivity.this, Uri.parse(urlLocal));
+                        UtilsCommon.showSnackbar(contentMain, R.string.profile_message_imageUploading, Snackbar.LENGTH_LONG);
+                    }
+                })
+                .setNeutralButton(R.string.common_label_cancel, null);
+        builder.setView(view);
 
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                //Previsualizar y recortar un poco la imgen para que sea mas eficiente la carga
+                int sizeImagePreview = getResources().getDimensionPixelSize(R.dimen.chat_size_img_preview);
+                Bitmap bitmap = UtilsImage.reduceBitmap(ProfileActivity.this, contentMain,
+                        urlLocal, sizeImagePreview, sizeImagePreview);
+
+                if (bitmap != null) {
+                    imageDialog.setImageBitmap(bitmap);
+                }
+                tvMessage.setText(R.string.profile_dialog_message);
+
+            }
+        });
+        alertDialog.show();
     }
 
     @Override
@@ -236,7 +279,7 @@ public class ProfileActivity extends AppCompatActivity implements ProfileView {
 
     @Override
     public void menuNormalMode() {
-        if(mCurrentMenuItem != null){
+        if (mCurrentMenuItem != null) {
             mCurrentMenuItem.setEnabled(true);
             mCurrentMenuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_pencil));
         }
