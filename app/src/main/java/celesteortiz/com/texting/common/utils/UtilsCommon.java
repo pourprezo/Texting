@@ -3,6 +3,7 @@ package celesteortiz.com.texting.common.utils;
 import android.content.Context;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
@@ -21,6 +22,16 @@ public class UtilsCommon {
     public static String getEmailEncoded(String email){
         String preKey = email.replace("_", "__");
         return preKey.replace(".", "_");
+    }
+
+    //Este metodo servira para la hora de Suscribirnos o desuscribirnos a un topico para recibir notificaciones.
+    // Primero Codificar nuestro correo
+    //despues Eliminar el arroba
+    public static String getEmailToTopic(String email){
+        String topic = getEmailEncoded(email);
+        topic = topic.replace("@", "64");
+        return topic;
+
     }
 
     //Cargar imagenes basicas con Glide
@@ -71,4 +82,8 @@ public class UtilsCommon {
         Snackbar.make(contentMain, resMsg, duration).show();
     }
 
+    public static boolean validateMessage(EditText etMessage) {
+        return etMessage.getText() != null &&
+                !etMessage.getText().toString().trim().isEmpty();
+    }
 }

@@ -72,4 +72,5 @@
     <string name="chats_title">Chats</string>
     <string name="addFriend_message_friendship_exists">Ya son amigos..</string>
     <string name="title_activity_chat">ChatActivity</string>
+    <string name="chat_status_last_connection">Ultima conexión: %s</string>
 </resources>

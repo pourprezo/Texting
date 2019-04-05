@@ -73,6 +73,7 @@ public class FirebaseRealtimeDatabaseAPI {
         updateMyLastConnection(online, "", uid);
     }
 
+    //Notificar a la persona con la que estamos chateando que estamos Conectados
     public void updateMyLastConnection(boolean online, String uidFriend, String uid){
         Log.d("DEBUG", " * * * FirebaseRealtimeDatabaseAPI:      Actualizando ultima conexion...STATUS: "+ online + " uidFriend: "+ uidFriend + " Usuario: "+ uid );
 
@@ -80,6 +81,10 @@ public class FirebaseRealtimeDatabaseAPI {
 
         Map<String, Object> values = new HashMap<>();
         values.put(UserPojo.LAST_CONNECTION_WITH, online ? lastConnectionWith : ServerValue.TIMESTAMP);
+
+        //(offline) Asignar a mi usuario con quien estoy conectada, ej: "-1___&___6KrJtMLFeKcGvEqHrJcKN49Lgah2"
+        getUserReferenceByUID(uid).child(UserPojo.LAST_CONNECTION_WITH).keepSynced(true);
+
         getUserReferenceByUID(uid).updateChildren(values);
 
         Log.d("DEBUG", " * * * FirebaseRealtimeDatabaseAPI:      Valores actualizados: lastConnectionWith...  " + lastConnectionWith);

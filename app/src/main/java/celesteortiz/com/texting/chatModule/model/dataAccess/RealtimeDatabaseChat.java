@@ -2,6 +2,7 @@ package celesteortiz.com.texting.chatModule.model.dataAccess;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.bumptech.glide.util.Util;
 import com.google.firebase.database.ChildEventListener;
@@ -44,10 +45,13 @@ public class RealtimeDatabaseChat {
     }
 
     public void subscribeToMessages(String myEmail, String friendEmail, final MessageEventListener listener){
+        Log.d("DEBUG CHAT", "Realtime Database: subscribeToMessages");
         if(mMessagesEventListener == null){
+            Log.d("DEBUG CHAT", "Realtime Database: mMessagesEventListener == null");
             mMessagesEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    Log.d("DEBUG CHAT", "Realtime Database: onChildAdded()");
                     listener.onMessageReceived(getMessage(dataSnapshot));
                 }
 
@@ -79,6 +83,8 @@ public class RealtimeDatabaseChat {
                 }
             };
         }
+        Log.d("DEBUG CHAT", "Realtime Database: mMessagesEventListener no es null");
+        Log.d("DEBUG CHAT", "Realtime Database: addChildEventListener(mMessagesEventListener)");
         getChatMessagesReference(myEmail, friendEmail).addChildEventListener(mMessagesEventListener);
     }
 
@@ -104,28 +110,36 @@ public class RealtimeDatabaseChat {
     }
 
     private Message getMessage(DataSnapshot dataSnapshot) {
+        Log.d("DEBUG CHAT", "Realtime Database: getMessage()");
         Message message = dataSnapshot.getValue(Message.class);
 
         if(message != null){
             message.setUid(dataSnapshot.getKey());
+            Log.d("DEBUG CHAT", "Realtime Database: message = "+ message);
 
         }
         return message;
     }
 
     public void unSubscribToMessages(String myEmail, String friendEmail){
+        Log.d("DEBUG CHAT", "Realtime Database: unSubscribToMessages()");
         if(mMessagesEventListener != null){
+            Log.d("DEBUG CHAT", "Realtime Database: mMessagesEventListener != null, Removiendo....");
             getChatMessagesReference(myEmail, friendEmail).removeEventListener(mMessagesEventListener);
         }
 
     }
 
-    //Suscribirse al estado de un amigo
+    //Suscribirse al estado de un amigo, se llama cuando se abre una conversacion
     public void subscribeToFriend(String uid, final LastConnectionEventListener listener){
+        Log.d("DEBUG CHAT", "Realtime Database: subscribeToFriend()");
         if(mFriendProfileListener == null){
+            Log.d("DEBUG CHAT", "Realtime Database: mFriendProfileListener is Null");
             mFriendProfileListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Log.d("DEBUG CHAT", "Realtime Database: mFriendProfileListener onDataChange");
+
                     long lastConnectionFriend = 0;
                     String uidConnectedFriend = "";
 
@@ -161,6 +175,12 @@ public class RealtimeDatabaseChat {
             };
         }
 
+        Log.d("DEBUG CHAT", "Realtime Database: mFriendProfileListener is not Null");
+
+        ////(offline) Con esto le decimos a Firebase Realtime Database que esa queremos que no se habilite
+        // la persistencia de datos, y que queremos que siempre se vaya a consultar al servidor
+        mDatabaseAPI.getUserReferenceByUID(uid).child(UserPojo.LAST_CONNECTION_WITH).keepSynced(true);
+
         mDatabaseAPI.getUserReferenceByUID(uid).child(UserPojo.LAST_CONNECTION_WITH)
                 .addValueEventListener(mFriendProfileListener);
 
@@ -168,7 +188,9 @@ public class RealtimeDatabaseChat {
 
     //Dessucribirnos del estado de nuestro amigo
     public void unsubscribeToFriend(String uid){
+        Log.d("DEBUG CHAT", "Realtime Database: unsubscribeToFriend()");
         if(mFriendProfileListener != null){
+            Log.d("DEBUG CHAT", "Realtime Database: mFriendProfileListener is not Null...Removing listener");
             mDatabaseAPI.getUserReferenceByUID(uid).child(UserPojo.LAST_CONNECTION_WITH)
                     .removeEventListener(mFriendProfileListener);
         }
@@ -192,6 +214,7 @@ public class RealtimeDatabaseChat {
                     Map<String, Object> updates = new HashMap<>();
                     //Setear a 0 los mensajes sin leer en el contacto de nuestro amigo
                     updates.put(UserPojo.MESSAGES_UNREAD, 0);
+                    Log.d("DEBUG CHAT", "Realtime Database: Seteando a 0 los mensajes sin leer");
                     userReference.updateChildren(updates);
                 }
             }
@@ -211,6 +234,7 @@ public class RealtimeDatabaseChat {
     //Sumar mensajes que no se han leido al contacto al cual le estamos enviando los mensajes y no
     //esta conectado o no esta conectado con nosotros
     public void sumUnreadMessages(String myUid, String friendUid){
+        Log.d("DEBUG CHAT", "Realtime Database: Destinatario no conectado, agregando mensaje sin leer...");
         //Acceder al perfil de neustro amigo y luego a nuestro contacto para agregar los mensajes no leidos
         final  DatabaseReference userReference = getOneContactReference(friendUid, myUid);
 
@@ -244,16 +268,23 @@ public class RealtimeDatabaseChat {
     //Enviar un mensaje
     public void sendMessage(String msg, String photoUrl, String friendEmail, UserPojo myUser,
                             final SendMessagesListener listener){
+        Log.d("DEBUG CHAT", "Realtime Database: Send Message...");
         Message message = new Message();
         message.setSender(myUser.getEmail());
         message.setMsg(msg);
         message.setPhotoUrl(photoUrl);
+
+        Log.d("DEBUG CHAT", "De: " + myUser.getEmail());
+        Log.d("DEBUG CHAT", "Para: " + friendEmail);
+        Log.d("DEBUG CHAT", "Mensaje: " + msg);
+        Log.d("DEBUG CHAT", "Photo: " + photoUrl);
 
         DatabaseReference chatReference = getChatMessagesReference(myUser.getEmail(), friendEmail);
         chatReference.push().setValue(message, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 if(databaseError == null){
+                    Log.d("DEBUG CHAT", "Realtime Database: Se ha guardado/enviado mensaje con exito..");
                     listener.onSuccess();
                 }
             }

@@ -30,6 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import celesteortiz.com.texting.addModule.view.AddFragment;
 import celesteortiz.com.texting.R;
+import celesteortiz.com.texting.chatModule.view.ChatActivity;
 import celesteortiz.com.texting.common.pojo.UserPojo;
 import celesteortiz.com.texting.common.utils.UtilsCommon;
 import celesteortiz.com.texting.loginModule.view.LoginActivity;
@@ -290,6 +291,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
      * */
     @Override
     public void onItemClick(UserPojo user) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(UserPojo.UID, user.getUid());
+        intent.putExtra(UserPojo.USERNAME, user.getUsername());
+        intent.putExtra(UserPojo.EMAIL, user.getEmail());
+        intent.putExtra(UserPojo.PHOTO_URL, user.getPhotoUrl());
+
+        if (UtilsCommon.hasMaterialDesign()) {
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        } else {
+            startActivity(intent);
+        }
 
 
     }

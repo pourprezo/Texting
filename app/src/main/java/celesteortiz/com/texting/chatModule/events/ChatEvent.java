@@ -10,10 +10,14 @@ public class ChatEvent {
     public static final int MESSAGE_ADDED       = 0;
     public static final int IMAGE_UPLOEAD_SUCCESS = 1;
     public static final int GET_STATUS_FRIEND   = 2;
+    public static final int SEND_NOTIFICATION_SUCCESS   = 3;
+
     public static final int ERROR_SERVER        = 100;
     public static final int IMAGE_UPLOAD_FAILED = 101;
     public static final int ERROR_VOLLEY        = 102;
     public static final int ERROR_PROCESS_DATA  = 103;
+    public static final int ERROR_METHOD_NOT_EXIST  = 104;
+
 
     private int typeEvent;
     private int resMsg;
