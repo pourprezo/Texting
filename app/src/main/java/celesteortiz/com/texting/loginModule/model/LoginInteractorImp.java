@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseUser;
 import org.greenrobot.eventbus.EventBus;
 
 import celesteortiz.com.texting.common.model.EventErrorTypeListener;
+import celesteortiz.com.texting.common.model.dataAccess.FirebaseCloudMessagingAPI;
 import celesteortiz.com.texting.common.pojo.UserPojo;
 import celesteortiz.com.texting.loginModule.events.LoginEvent;
 import celesteortiz.com.texting.loginModule.model.dataAccess.FirebaseAuthentication;
@@ -16,10 +17,14 @@ import celesteortiz.com.texting.loginModule.model.dataAccess.StatusAuthCallback;
 public class LoginInteractorImp implements LoginInteractor {
    private FirebaseAuthentication mAuthentication;
    private RealtimeDatabase mDatabase;
+   //Notificaciones Push
+    private FirebaseCloudMessagingAPI mCloudMessagingAPI;
 
     public LoginInteractorImp() {
         mAuthentication = new FirebaseAuthentication();
         mDatabase = new RealtimeDatabase();
+        //Notificaciones Push
+        mCloudMessagingAPI = FirebaseCloudMessagingAPI.getInstance();
     }
 
     @Override
@@ -41,7 +46,6 @@ public class LoginInteractorImp implements LoginInteractor {
             @Override
             public void onGetUser(FirebaseUser user) {
                 //Una vez consultado el usuario correctamente posteamos el evento
-                Log.d("DEBUG_C", "Interactor:    onGetUser() Postear evento STATUS_AUTH_SUCCESS...");
                 post(LoginEvent.STATUS_AUTH_SUCCESS, user);
 
                 //Cuando el usuario si este autenticado, revisar si existe de BD
@@ -54,17 +58,21 @@ public class LoginInteractorImp implements LoginInteractor {
                             Log.d("DEBUG_C", "    User do not exist 102, Registrar...");
                             registerUser();
                         }else {
-                            Log.d("DEBUG_C", "    Postear event");
                             post(typeEvent);
                         }
                     }
                 });
+
+                //Notificaciones Push , suscribirnos a nuestro propio correo
+                //y de esta forma todos los demas usuarios que nos tengan agreados como contacto
+                //utilizaran ese topic.
+                mCloudMessagingAPI.subscribeToMyTopic(user.getEmail());
+
             }
 
             //Para cuando haya un error, y necesitemos lanzar la interfaz de FIrebase UI
             @Override
             public void onLaunchUILogin() {
-                Log.d("DEBUG_C", "Interactor: Lanzar pantalla de Inicio de sesion y postear STATUS_AUTH_ERROR..");
                 //posteamos solamente el typeEvent
                 post(LoginEvent.STATUS_AUTH_ERROR);
             }

@@ -8,6 +8,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import celesteortiz.com.texting.common.Constants;
 import celesteortiz.com.texting.common.model.BasicEventsCallback;
+import celesteortiz.com.texting.common.model.dataAccess.FirebaseCloudMessagingAPI;
 import celesteortiz.com.texting.common.pojo.UserPojo;
 import celesteortiz.com.texting.mainModule.events.MainEvent;
 import celesteortiz.com.texting.mainModule.model.dataAccess.Authentication;
@@ -17,6 +18,8 @@ import celesteortiz.com.texting.mainModule.model.dataAccess.UserEventListener;
 public class MainInteractorImpl implements MainInteractor {
     private RealtimeDatabase mDatabase;
     private Authentication mAuthentication;
+    //Notificaciones Push
+    private FirebaseCloudMessagingAPI mCloudMessagingAPI;
 
     private UserPojo mMyUser = null;
 
@@ -24,6 +27,9 @@ public class MainInteractorImpl implements MainInteractor {
     public MainInteractorImpl() {
         mDatabase = new RealtimeDatabase();
         mAuthentication = new Authentication();
+
+        //Notificaciones Push
+        mCloudMessagingAPI = FirebaseCloudMessagingAPI.getInstance();
     }
 
     @Override
@@ -102,6 +108,12 @@ public class MainInteractorImpl implements MainInteractor {
     @Override
     public void signOff() {
         Log.d("DEBUG", "MainInteractor:   Cerrar sesion....");
+
+        //Notificaciones Push ,
+        //Desuscribirnos de nuestro propio correo (topic)
+        //antes de llamar a signOff, de otro modo no podriamos obtener el correo del usuario logueado
+        mCloudMessagingAPI.unsubscribeToMyTopic(getCurrentUser().getEmail());
+
         mAuthentication.signOff();
 
     }

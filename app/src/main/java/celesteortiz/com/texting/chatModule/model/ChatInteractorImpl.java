@@ -9,9 +9,11 @@ import com.firebase.ui.auth.data.model.User;
 import org.greenrobot.eventbus.EventBus;
 
 import celesteortiz.com.texting.chatModule.events.ChatEvent;
+import celesteortiz.com.texting.chatModule.model.dataAccess.NotificationRemoteService;
 import celesteortiz.com.texting.chatModule.model.dataAccess.RealtimeDatabaseChat;
 import celesteortiz.com.texting.chatModule.model.dataAccess.StorageChat;
 import celesteortiz.com.texting.common.Constants;
+import celesteortiz.com.texting.common.model.EventErrorTypeListener;
 import celesteortiz.com.texting.common.model.StorageUploadImageCallback;
 import celesteortiz.com.texting.common.model.dataAccess.FirebaseAuthenticationAPI;
 import celesteortiz.com.texting.common.model.dataAccess.FirebaseRealtimeDatabaseAPI;
@@ -22,6 +24,8 @@ public class ChatInteractorImpl implements ChatInteractor {
     private RealtimeDatabaseChat mDatabase;
     private FirebaseAuthenticationAPI mAuthenticationAPI;
     private StorageChat mStorage;
+    //Notificaciones Push
+    private NotificationRemoteService mNotificationRS;
 
     private UserPojo mMyUser;
     private String mFriendUid;
@@ -34,6 +38,7 @@ public class ChatInteractorImpl implements ChatInteractor {
         this.mDatabase = new RealtimeDatabaseChat();
         this.mAuthenticationAPI = FirebaseAuthenticationAPI.getInstance();
         this.mStorage = new StorageChat();
+        this.mNotificationRS = new NotificationRemoteService();
     }
 
     private UserPojo getCurrentUser(){
@@ -126,16 +131,24 @@ public class ChatInteractorImpl implements ChatInteractor {
             @Override
             public void onSuccess() {
                 Log.d("DEBUG CHAT", "Interactor: Mensaje enviado con exito...");
-                //Una vez que se haya insertado correcamente el mje en Realtime Database,
-                // Validar si procede o no el incrementar el numero de mensajes no leidos por el usuario
-
-                //Si no esta conectado conmigo, entonces incrementa el numero de mensajes no leidos
-                // de mi parte
+                /*Una vez que se haya insertado correcamente el mje en Realtime Database,
+                Validar si procede o no el incrementar el numero de mensajes no leidos por el usuario
+                Si no esta conectado conmigo, entonces incrementa el numero de mensajes no leidos de mi parte */
                 if(!mUidConnectedFriend.equals(getCurrentUser().getUid())){
                     Log.d("DEBUG CHAT", "Interactor: Destinatario no conectado, agregando mensaje Unread");
                     mDatabase.sumUnreadMessages(getCurrentUser().getUid(), mFriendUid);
 
-                    // TODO: 01/04/2019 Push Notifications
+                    //Si no esta conectado el usuario al que le estoy escribiendo, se envia notificacion push
+                    if (mLastConnectionFriend != Constants.ONLINE_VALUE) {
+                        mNotificationRS.sendNotification(getCurrentUser().getUsername(), msg,
+                                mFriendEmail, getCurrentUser().getUid(), getCurrentUser().getEmail(),
+                                getCurrentUser().getUri(), new EventErrorTypeListener() {
+                                    @Override
+                                    public void onError(int typeEvent, int resMsg) {
+                                        post(typeEvent, resMsg);
+                                    }
+                                });
+                    }
                 }
             }
         });

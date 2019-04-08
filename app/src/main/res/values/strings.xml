@@ -73,4 +73,7 @@
     <string name="addFriend_message_friendship_exists">Ya son amigos..</string>
     <string name="title_activity_chat">ChatActivity</string>
     <string name="chat_status_last_connection">Ultima conexión: %s</string>
+    <string name="common_error_process_data">ERROR_PROCESS_DATA: Error interno, disculpe las molestias</string>
+    <string name="common_error_volley">ERROR VOLLEY: Error de comunicacion con el servidor, intente mas tarde. Error interno, disculpe las molestias</string>
+    <string name="chat_error_method_not_exist">Imposible notificar al usuario, contacte a su administrador</string>
 </resources>
